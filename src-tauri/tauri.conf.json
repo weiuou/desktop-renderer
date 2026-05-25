@@ -35,6 +35,9 @@
       "icons/icon.ico",
       "icons/icon.icns"
     ],
+    "macOS": {
+      "signingIdentity": "-"
+    },
     "targets": "all",
     "resources": {
       "../bin/BlueMap-cli.jar": "BlueMap-cli.jar"
