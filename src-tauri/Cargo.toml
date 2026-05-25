@@ -1,6 +1,6 @@
 [package]
 name = "tongcraft-bluemap-renderer"
-version = "0.1.0"
+version = "0.1.2"
 description = "A local BlueMap render tester for TongCraft worlds"
 authors = ["TongCraft"]
 edition = "2021"

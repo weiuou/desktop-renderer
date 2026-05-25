@@ -438,18 +438,24 @@ fn java_major(version: &str) -> Option<u32> {
 
 fn inspect_world_path(world: &Path) -> Result<WorldInspection, String> {
     let has_level_dat = world.join("level.dat").is_file();
-    let has_nether = world.join("DIM-1").is_dir();
-    let has_end = world.join("DIM1").is_dir();
+    let has_nether_dir = world.join("DIM-1").is_dir();
+    let has_end_dir = world.join("DIM1").is_dir();
+    let has_nether = has_dimension_regions(world, "DIM-1");
+    let has_end = has_dimension_regions(world, "DIM1");
     let (size_bytes, file_count) = dir_stats(world)?;
     let mut warnings = vec![];
     if !has_level_dat {
         warnings.push("这个目录缺少 level.dat，BlueMap 可能无法识别为 Java 世界。".to_string());
     }
-    if !has_nether {
+    if !has_nether_dir {
         warnings.push("未发现 DIM-1，下界渲染会自动关闭。".to_string());
+    } else if !has_nether {
+        warnings.push("DIM-1 中没有 region/*.mca，下界没有可渲染区块。".to_string());
     }
-    if !has_end {
+    if !has_end_dir {
         warnings.push("未发现 DIM1，末地渲染会自动关闭。".to_string());
+    } else if !has_end {
+        warnings.push("DIM1 中没有 region/*.mca，末地没有可渲染区块。".to_string());
     }
     Ok(WorldInspection {
         valid: has_level_dat,
@@ -466,6 +472,21 @@ fn inspect_world_path(world: &Path) -> Result<WorldInspection, String> {
         file_count,
         estimated_required_bytes: size_bytes.saturating_add(5 * 1024 * 1024 * 1024),
         warnings,
+    })
+}
+
+fn has_dimension_regions(world: &Path, dimension_dir: &str) -> bool {
+    let region_dir = world.join(dimension_dir).join("region");
+    let Ok(entries) = fs::read_dir(region_dir) else {
+        return false;
+    };
+
+    entries.filter_map(Result::ok).any(|entry| {
+        entry
+            .path()
+            .extension()
+            .and_then(|extension| extension.to_str())
+            .is_some_and(|extension| extension.eq_ignore_ascii_case("mca"))
     })
 }
 
@@ -637,11 +658,11 @@ storage: "file"
         ),
     )?;
 
-    if render_nether && world.join("DIM-1").is_dir() {
+    if render_nether && has_dimension_regions(world, "DIM-1") {
         write_file(
             &job_dir.join("config/maps/world_nether.conf"),
             &format!(
-                r##"world: "{}/DIM-1"
+                r##"world: "{}"
 dimension: "minecraft:the_nether"
 name: "TongCraft Nether"
 sorting: 10
@@ -661,11 +682,11 @@ storage: "file"
         )?;
     }
 
-    if render_end && world.join("DIM1").is_dir() {
+    if render_end && has_dimension_regions(world, "DIM1") {
         write_file(
             &job_dir.join("config/maps/world_the_end.conf"),
             &format!(
-                r##"world: "{}/DIM1"
+                r##"world: "{}"
 dimension: "minecraft:the_end"
 name: "TongCraft End"
 sorting: 20
