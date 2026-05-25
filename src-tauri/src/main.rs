@@ -505,15 +505,31 @@ fn locate_bluemap_jar(app: &tauri::AppHandle) -> Option<PathBuf> {
             return Some(packaged);
         }
     }
+
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            for candidate in [
+                exe_dir.join("BlueMap-cli.jar"),
+                exe_dir.join("bin").join("BlueMap-cli.jar"),
+            ] {
+                if candidate.exists() {
+                    return Some(candidate);
+                }
+            }
+        }
+    }
+
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let app_root = manifest_dir.parent()?;
     let local = app_root.join("bin/BlueMap-cli.jar");
     if local.exists() {
         return Some(local);
     }
-    app_root
-        .parent()
-        .map(|repo_root| repo_root.join("bin/BlueMap-cli.jar"))
+    let repo_local = app_root.parent()?.join("bin/BlueMap-cli.jar");
+    if repo_local.exists() {
+        return Some(repo_local);
+    }
+    None
 }
 
 fn java_compatible_path(path: &Path) -> PathBuf {

@@ -23,4 +23,11 @@ cd desktop-renderer
 npm run tauri:build
 ```
 
+## Release
+
+GitHub Actions publishes Windows release assets with `BlueMap-cli.jar` included:
+
+- `*_setup.exe`: NSIS installer, recommended for normal users.
+- `*-portable.zip`: portable package; extract the whole zip before running the app.
+
 The app creates a separate render job directory and does not write into the selected Minecraft world.
