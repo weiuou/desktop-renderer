@@ -13,6 +13,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-windows-x64:
     name: Windows x64
@@ -119,13 +122,19 @@ jobs:
         with:
           path: release-assets
 
+      - name: Collect release assets
+        run: |
+          mkdir -p release-assets/upload
+          find release-assets -type f \( -name "*.exe" -o -name "*.zip" -o -name "*.dmg" \) -print -exec cp "{}" release-assets/upload/ \;
+          test -n "$(find release-assets/upload -type f -print -quit)"
+
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release-assets/tongcraft-bluemap-renderer-windows-x64/*.exe
-            release-assets/tongcraft-bluemap-renderer-windows-x64/*.zip
-            release-assets/tongcraft-bluemap-renderer-macos-arm64/*.dmg
+            release-assets/upload/*.exe
+            release-assets/upload/*.zip
+            release-assets/upload/*.dmg
           fail_on_unmatched_files: true
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, '-') }}
