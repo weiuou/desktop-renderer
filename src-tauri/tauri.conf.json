@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "TongCraft BlueMap Renderer",
+  "version": "0.1.0",
+  "identifier": "art.weiuou.tongcraft.renderer",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "TongCraft BlueMap Renderer",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 920,
+        "minHeight": 640
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/16x16.png",
+      "icons/32x32.png",
+      "icons/64x64.png",
+      "icons/128x128.png",
+      "icons/256x256.png",
+      "icons/512x512.png",
+      "icons/icon.ico",
+      "icons/icon.icns"
+    ],
+    "targets": "all",
+    "resources": {
+      "../bin/BlueMap-cli.jar": "BlueMap-cli.jar"
+    }
+  }
+}
